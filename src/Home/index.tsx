@@ -1,4 +1,4 @@
-import { useState, useEffect,useContext  } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { Link } from 'react-router'
 import { EquiposContext } from "../EquiposContext";
 
@@ -22,19 +22,15 @@ interface Estadistica {
 
 type FiltroTipo = 'posiciones' | 'goleador' | 'asistencias' | 'amarillas' | 'atajadas'
 
-
 function Home() {
   const [ranking, setRanking] = useState<Ranking[]>([])
   const [title, setTitle] = useState('')
-
-  const equiposMap = useContext(EquiposContext);
-  //filtro
   const [filtro, setFiltro] = useState<FiltroTipo>('posiciones')
   const [estadisticas, setEstadisticas] = useState<Estadistica[]>([])
-
-  const filtros: FiltroTipo[] = ['posiciones', 'goleador', 'asistencias', 'amarillas', 'atajadas'];
-
   const [busqueda, setBusqueda] = useState('')
+
+  const equiposMap = useContext(EquiposContext);
+  const filtros: FiltroTipo[] = ['posiciones', 'goleador', 'asistencias', 'amarillas', 'atajadas'];
 
   useEffect(() => {
     setBusqueda('') 
@@ -53,24 +49,22 @@ function Home() {
         console.error('Error cargando datos:', error)
       }
     }
-
     fetchData()
   }, [filtro])
 
+  // 1. Lógica de filtrado para el buscador
   const rankingFiltrado = ranking.filter((equipo) =>
     busqueda.length < 3
-      ? true  // muestra todos si hay menos de 3 caracteres
+      ? true 
       : equipo.contestantName.toLowerCase().includes(busqueda.toLowerCase())
   )
 
   const estadisticasFiltradas = estadisticas.filter((jugador) =>
     busqueda.length < 3
-      ? true  // muestra todos
+      ? true 
       : jugador.name.toLowerCase().includes(busqueda.toLowerCase()) ||
         jugador.contestantName.toLowerCase().includes(busqueda.toLowerCase())
   )
-
-
 
   return (
     <>
@@ -106,20 +100,14 @@ function Home() {
               </tr>
             </thead>
             <tbody>
-              {ranking.map((equipo) => (
-                <tr key={equipo.rank}
-                    className={
-                      busqueda.length >= 3 &&
-                      equipo.contestantName.toLowerCase().includes(busqueda.toLowerCase())
-                        ? 'resaltado'
-                        : ''
-                    }
-                >
+              {/* 2. USAR rankingFiltrado en lugar de ranking */}
+              {rankingFiltrado.map((equipo) => (
+                <tr key={equipo.rank}>
                   <td>{equipo.rank}</td>
                   <td>
-                        <Link to={`/equipo/${equiposMap[equipo.contestantName] || "default"}`}>
-                        {equipo.contestantName}
-                      </Link>
+                    <Link to={`/equipo/${equiposMap[equipo.contestantName] || "default"}`}>
+                      {equipo.contestantName}
+                    </Link>
                   </td>
                   <td>{equipo.matchesPlayed}</td>
                   <td>{equipo.points}</td>
@@ -139,16 +127,9 @@ function Home() {
               </tr>
             </thead>
             <tbody>
-              {estadisticas.map((jugador, index) => (
-                <tr key={index}
-                    className={
-                      busqueda.length >= 3 &&
-                      (jugador.name.toLowerCase().includes(busqueda.toLowerCase()) ||
-                      jugador.contestantName.toLowerCase().includes(busqueda.toLowerCase()))
-                        ? 'resaltado'
-                        : ''
-                    }
-                >
+              {/* 3. USAR estadisticasFiltradas en lugar de estadisticas */}
+              {estadisticasFiltradas.map((jugador, index) => (
+                <tr key={index}>
                   <td>{jugador.position}</td>
                   <td>{jugador.name}</td>
                   <td>{jugador.contestantName}</td>
