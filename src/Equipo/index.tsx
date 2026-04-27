@@ -1,136 +1,134 @@
 import { useParams } from "react-router";
 import { useEffect, useState } from "react";
 
-interface TeamData {
-  team: {
-    name: string;
-    info: {
-      city: string;
-      founded: string;
-      stadium: string;
-      president: string;
-      last_title: string;
-    };
-    ranking: {
-      position: string;
-      competition: string;
-    };
-    social: {
-      facebook: string;
-      instagram: string;
-      x: string;
-    };
-    links: {
-      store: string;
-      tickets: string;
+// Adaptamos la interfaz a la respuesta real de PokeAPI
+interface PokemonData {
+  name: string;
+  id: number;
+  sprites: {
+    front_default: string;
+    other: {
+      "official-artwork": { front_default: string };
     };
   };
+  types: { type: { name: string } }[];
+  stats: { base_stat: number; stat: { name: string } }[];
+  abilities: { ability: { name: string } }[];
+  height: number;
+  weight: number;
 }
 
-function Equipo() {
-  const { equipo } = useParams<{ equipo: string }>();
+function PokemonDetalle() {
+  // El parámetro ahora es 'name' (o el que hayas definido en tu Router)
+  const { equipo: pokemonName } = useParams<{ equipo: string }>();
 
-  const [data, setData] = useState<TeamData | null>(null);
+  const [data, setData] = useState<PokemonData | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-  if (!equipo) return;
+    if (!pokemonName) return;
 
-  // Revisar si ya es favorito
-  const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-
-  if (favorites.includes(equipo)) {
-    setIsFavorite(true);
-  }
-
-  const fetchData = async () => {
-    try {
-      const res = await fetch(
-        `https://raw.githubusercontent.com/sdtibata/dataliga/main/${equipo}.json`
-      );
-
-      const data = await res.json();
-      setData(data);
-    } catch (error) {
-      console.error("Error cargando datos:", error);
+    // Revisar si ya es favorito en localStorage
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    if (favorites.includes(pokemonName)) {
+      setIsFavorite(true);
     }
-  };
 
-  fetchData();
-}, [equipo]);
+    const fetchData = async () => {
+      try {
+        const res = await fetch(
+          `https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`
+        );
+        const data = await res.json();
+        setData(data);
+      } catch (error) {
+        console.error("Error cargando el Pokémon:", error);
+      }
+    };
+
+    fetchData();
+  }, [pokemonName]);
 
   const toggleFavorite = () => {
-  if (!equipo) return;
+    if (!pokemonName) return;
 
-  let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
 
-  if (favorites.includes(equipo)) {
-      favorites = favorites.filter((fav: string) => fav !== equipo);
+    if (favorites.includes(pokemonName)) {
+      favorites = favorites.filter((fav: string) => fav !== pokemonName);
       setIsFavorite(false);
     } else {
-      favorites.push(equipo);
+      favorites.push(pokemonName);
       setIsFavorite(true);
     }
 
     localStorage.setItem("favorites", JSON.stringify(favorites));
   };
 
-  if (!data) return <p>Cargando...</p>;
+  if (!data) return <p>Cargando datos del Pokémon...</p>;
 
   return (
-    <div>
-      <h1>{data.team.name}
+    <div className="pokemon-container">
+      <header style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <img 
+          src={data.sprites.other["official-artwork"].front_default} 
+          alt={data.name} 
+          style={{ width: '150px' }}
+        />
+        <div>
+          <h1 style={{ textTransform: 'capitalize' }}>
+            {data.name} #{data.id}
+            <button onClick={toggleFavorite} style={{ marginLeft: '15px', cursor: 'pointer' }}>
+              {isFavorite ? "❤️" : "🤍"}
+            </button>
+          </h1>
+          <div className="types">
+            {data.types.map(t => (
+              <span key={t.type.name} className={`badge ${t.type.name}`} style={{ marginRight: '5px', padding: '5px 10px', borderRadius: '4px', background: '#eee' }}>
+                {t.type.name.toUpperCase()}
+              </span>
+            ))}
+          </div>
+        </div>
+      </header>
 
-        <button onClick={toggleFavorite}>
-          {isFavorite ? "❤️" : "🤍"}
-        </button>
-      </h1>
+      <section>
+        <h2>Información Física</h2>
+        <p><strong>Altura:</strong> {data.height / 10} m</p>
+        <p><strong>Peso:</strong> {data.weight / 10} kg</p>
+      </section>
 
-      <h2>Información</h2>
-      <p><strong>Ciudad:</strong> {data.team.info.city}</p>
-      <p><strong>Fundado:</strong> {data.team.info.founded}</p>
-      <p><strong>Estadio:</strong> {data.team.info.stadium}</p>
-      <p><strong>Presidente:</strong> {data.team.info.president}</p>
-      <p><strong>Último título:</strong> {data.team.info.last_title}</p>
+      <section>
+        <h2>Estadísticas Base</h2>
+        <ul>
+          {data.stats.map(s => (
+            <li key={s.stat.name}>
+              <strong style={{ textTransform: 'capitalize' }}>{s.stat.name}:</strong> {s.base_stat}
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      <h2>Ranking</h2>
-      <p><strong>Posición:</strong> {data.team.ranking.position}</p>
-      <p><strong>Competencia:</strong> {data.team.ranking.competition}</p>
+      <section>
+        <h2>Habilidades</h2>
+        <ul>
+          {data.abilities.map(a => (
+            <li key={a.ability.name} style={{ textTransform: 'capitalize' }}>
+              {a.ability.name}
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      <h2>Redes</h2>
-      <ul>
-        <li>
-          <a href={data.team.social.facebook} target="_blank" rel="noreferrer">
-            Facebook
-          </a>
-        </li>
-        <li>
-          <a href={data.team.social.instagram} target="_blank" rel="noreferrer">
-            Instagram
-          </a>
-        </li>
-        <li>
-          <a href={data.team.social.x} target="_blank" rel="noreferrer">
-            X (Twitter)
-          </a>
-        </li>
-      </ul>
-
-      <h2>Extras</h2>
-      <ul>
-        <li>
-          <a href={data.team.links.store} target="_blank" rel="noreferrer">
-            Tienda oficial
-          </a>
-        </li>
-        <li>
-          <a href={data.team.links.tickets} target="_blank" rel="noreferrer">
-            Comprar boletas
-          </a>
-        </li>
-      </ul>
+      <section>
+        <h2>Sprites</h2>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <img src={data.sprites.front_default} alt="Frente" />
+          {/* Puedes agregar más variantes si quieres */}
+        </div>
+      </section>
     </div>
   );
 }
 
-export default Equipo;
+export default PokemonDetalle;

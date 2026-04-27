@@ -1,0 +1,70 @@
+.original-simple-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px 20px;
+  min-height: 100vh;
+  background-color: #f4f4f9;
+}
+
+.controls {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.btn-random-big {
+  background-color: #ff4757;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+  transition: transform 0.2s;
+}
+
+.btn-random-big:hover {
+  transform: scale(1.05);
+  background-color: #ff6b81;
+}
+
+.poke-display-card {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.poke-name-main {
+  text-transform: capitalize;
+  font-size: 2rem;
+  margin: 10px 0;
+}
+
+.poke-image-container img {
+  width: 200px;
+  height: 200px;
+}
+
+.tag-type {
+  display: inline-block;
+  padding: 5px 15px;
+  margin: 5px;
+  border-radius: 20px;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+/* Colores de ejemplo para los tipos */
+.fire { background-color: #f0932b; }
+.water { background-color: #0984e3; }
+.grass { background-color: #26de81; }
+.electric { background-color: #f1c40f; }
+.psychic { background-color: #a29bfe; }
